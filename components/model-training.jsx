@@ -18,6 +18,8 @@ export default function ModelTraining({ data, onModelsTrained }) {
   const [progress, setProgress] = useState(0)
   const [results, setResults] = useState(null)
   const [trainingLog, setTrainingLog] = useState([])
+  const [enableSegmentation, setEnableSegmentation] = useState(false)
+  const [segmentColumn, setSegmentColumn] = useState("")
 
   const availableModels = [
     {
@@ -58,9 +60,9 @@ export default function ModelTraining({ data, onModelsTrained }) {
     setTrainingLog((prev) => [...prev, { message, type, timestamp: new Date().toLocaleTimeString() }])
   }
 
-  const simulateModelTraining = async (modelId) => {
+  const simulateModelTraining = async (modelId, segment) => {
     const model = availableModels.find((m) => m.id === modelId)
-    addToLog(`Starting ${model.name} training...`, "info")
+    addToLog(`Starting ${model.name} training${segment ? ` for segment: ${segment}` : ""}...`, "info")
 
     // Simulate training time based on model complexity
     const trainingSteps = {
@@ -92,7 +94,10 @@ export default function ModelTraining({ data, onModelsTrained }) {
     const r2 = accuracy
     const trainingTime = (Math.random() * 10 + 5).toFixed(1)
 
-    addToLog(`${model.name} training completed - Accuracy: ${(accuracy * 100).toFixed(1)}%`, "success")
+    addToLog(
+      `${model.name} training${segment ? ` for segment: ${segment}` : ""} completed - Accuracy: ${(accuracy * 100).toFixed(1)}%`,
+      "success",
+    )
 
     return {
       name: model.name,
@@ -104,6 +109,7 @@ export default function ModelTraining({ data, onModelsTrained }) {
       trainingTime: trainingTime,
       status: "completed",
       script: model.script,
+      segment: segment,
     }
   }
 
@@ -116,15 +122,34 @@ export default function ModelTraining({ data, onModelsTrained }) {
     setTrainingLog([])
 
     try {
-      addToLog("Initializing model training pipeline...", "info")
+      addToLog("Initializing advanced model training pipeline...", "info")
       addToLog(`Target variable: ${targetColumn}`, "info")
       addToLog(`Selected models: ${selectedModels.length}`, "info")
 
+      if (enableSegmentation && segmentColumn) {
+        addToLog(`Segmentation enabled on: ${segmentColumn}`, "info")
+      }
+
       const modelResults = {}
 
+      // Global models
       for (const modelId of selectedModels) {
-        const result = await simulateModelTraining(modelId)
-        modelResults[modelId] = result
+        const result = await simulateModelTraining(modelId, "global")
+        modelResults[`${modelId}_global`] = result
+      }
+
+      // Segmented models if enabled
+      if (enableSegmentation && segmentColumn) {
+        const segments = [...new Set(data.rows.map((row) => row[segmentColumn]))].slice(0, 3)
+
+        for (const segment of segments) {
+          addToLog(`Training models for segment: ${segment}`, "info")
+          for (const modelId of selectedModels.slice(0, 2)) {
+            // Limit for demo
+            const result = await simulateModelTraining(modelId, segment)
+            modelResults[`${modelId}_${segment}`] = result
+          }
+        }
       }
 
       setResults(modelResults)
@@ -133,9 +158,10 @@ export default function ModelTraining({ data, onModelsTrained }) {
         models: modelResults,
         trainingData: data,
         features: data.summary.numericColumns.filter((col) => col !== targetColumn),
+        segmentation: enableSegmentation ? { column: segmentColumn, enabled: true } : { enabled: false },
       })
 
-      addToLog("All models trained successfully!", "success")
+      addToLog("Advanced model training completed successfully!", "success")
     } catch (error) {
       addToLog(`Training error: ${error.message}`, "error")
     } finally {
@@ -211,10 +237,46 @@ export default function ModelTraining({ data, onModelsTrained }) {
             </div>
           </div>
 
+          <div>
+            <Label className="text-base font-medium mb-4 block">Advanced Options</Label>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="enableSegmentation"
+                  checked={enableSegmentation}
+                  onCheckedChange={setEnableSegmentation}
+                />
+                <Label htmlFor="enableSegmentation" className="font-medium">
+                  Enable segmented forecasting
+                </Label>
+              </div>
+
+              {enableSegmentation && (
+                <div>
+                  <Label>Segmentation Column</Label>
+                  <Select value={segmentColumn} onValueChange={setSegmentColumn}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Select column for segmentation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {data.headers
+                        .filter((col) => !data.summary.numericColumns.includes(col))
+                        .map((column) => (
+                          <SelectItem key={column} value={column}>
+                            {column}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          </div>
+
           <Button
             onClick={trainModels}
             disabled={!targetColumn || selectedModels.length === 0 || training}
-            className="w-full bg-green-700 text-white"
+            className="w-full"
           >
             <Play className="h-4 w-4 mr-2" />
             {training ? "Training Models..." : `Train ${selectedModels.length} Model(s)`}

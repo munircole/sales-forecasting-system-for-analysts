@@ -12,8 +12,10 @@ import { TrendingUp, Target } from "lucide-react"
 export default function Predictions({ data, models }) {
   const [selectedModel, setSelectedModel] = useState("")
   const [predictionPeriod, setPredictionPeriod] = useState("30")
+  const [forecastType, setForecastType] = useState("point")
   const [predictions, setPredictions] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [insights, setInsights] = useState(null)
 
   const generatePredictions = async () => {
     if (!models || !selectedModel) return
@@ -86,6 +88,23 @@ export default function Predictions({ data, models }) {
           modelType: model.type,
         },
       })
+
+      // Generate business insights
+      const insights = {
+        summary: `Based on ${model.name} analysis of your data`,
+        keyFindings: [
+          `Expected ${trend > 0 ? "growth" : "decline"} of ${Math.abs(trend * days).toFixed(0)} over ${days} days`,
+          `Model confidence: ${(accuracy * 100).toFixed(0)}% based on historical patterns`,
+          `${trend > 0 ? "Positive" : "Negative"} trend detected in recent data`,
+        ],
+        recommendations: [
+          trend > 0 ? "Prepare for increased demand" : "Plan for potential downturn",
+          "Monitor actual vs predicted values closely",
+          "Update forecasts as new data becomes available",
+        ],
+      }
+
+      setInsights(insights)
     } catch (error) {
       console.error("Prediction error:", error)
     } finally {
@@ -112,7 +131,7 @@ export default function Predictions({ data, models }) {
           <CardDescription>Generate future sales predictions using trained models</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <div>
               <Label>Select Model</Label>
               <Select value={selectedModel} onValueChange={setSelectedModel}>
@@ -122,7 +141,8 @@ export default function Predictions({ data, models }) {
                 <SelectContent>
                   {Object.entries(models.models).map(([id, model]) => (
                     <SelectItem key={id} value={id}>
-                      {model.name} (Accuracy: {(Number.parseFloat(model.accuracy) * 100).toFixed(1)}%)
+                      {model.name} {id.includes("_") ? `(${id.split("_").pop()})` : "(Global)"}
+                      (Accuracy: {(Number.parseFloat(model.accuracy) * 100).toFixed(1)}%)
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -144,9 +164,23 @@ export default function Predictions({ data, models }) {
                 </SelectContent>
               </Select>
             </div>
+
+            <div>
+              <Label>Forecast Type</Label>
+              <Select value={forecastType} onValueChange={setForecastType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="point">Point Forecast</SelectItem>
+                  <SelectItem value="interval">Confidence Intervals</SelectItem>
+                  <SelectItem value="scenario">Scenario Analysis</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <Button onClick={generatePredictions} disabled={!selectedModel || loading} className="w-full bg-green-700 text-white">
+          <Button onClick={generatePredictions} disabled={!selectedModel || loading} className="w-full">
             <Target className="h-4 w-4 mr-2" />
             {loading ? "Generating Predictions..." : "Generate Predictions"}
           </Button>
@@ -188,49 +222,99 @@ export default function Predictions({ data, models }) {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Prediction Visualization</CardTitle>
-              <CardDescription>
-                Historical data vs Future predictions with confidence intervals ({predictions.summary.modelType} Model)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={predictions.combined}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="actual" stroke="#8884d8" strokeWidth={2} name="Historical" />
-                  <Line
-                    type="monotone"
-                    dataKey="predicted"
-                    stroke="#82ca9d"
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    name="Predicted"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="confidence_upper"
-                    stroke="#ffc658"
-                    strokeWidth={1}
-                    strokeDasharray="2 2"
-                    name="Upper Confidence"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="confidence_lower"
-                    stroke="#ff7300"
-                    strokeWidth={1}
-                    strokeDasharray="2 2"
-                    name="Lower Confidence"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          {forecastType === "interval" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Prediction Visualization</CardTitle>
+                <CardDescription>
+                  Historical data vs Future predictions with confidence intervals ({predictions.summary.modelType}{" "}
+                  Model)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={predictions.combined}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="actual" stroke="#8884d8" strokeWidth={2} name="Historical" />
+                    <Line
+                      type="monotone"
+                      dataKey="predicted"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      name="Predicted"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="confidence_upper"
+                      stroke="#ffc658"
+                      strokeWidth={1}
+                      strokeDasharray="2 2"
+                      name="Upper Confidence"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="confidence_lower"
+                      stroke="#ff7300"
+                      strokeWidth={1}
+                      strokeDasharray="2 2"
+                      name="Lower Confidence"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {forecastType === "point" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Prediction Visualization</CardTitle>
+                <CardDescription>
+                  Historical data vs Future predictions ({predictions.summary.modelType} Model)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={predictions.combined}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="actual" stroke="#8884d8" strokeWidth={2} name="Historical" />
+                    <Line
+                      type="monotone"
+                      dataKey="predicted"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      name="Predicted"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {forecastType === "scenario" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Prediction Visualization</CardTitle>
+                <CardDescription>
+                  Scenario analysis for future predictions ({predictions.summary.modelType} Model)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <h3 className="font-medium mb-2">Scenario Analysis</h3>
+                  <p className="text-sm text-gray-600">This feature is currently under development.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>
@@ -294,6 +378,35 @@ export default function Predictions({ data, models }) {
               </div>
             </CardContent>
           </Card>
+
+          {insights && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Business Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-600">{insights.summary}</div>
+                  <div>
+                    <h4 className="font-medium mb-2">Key Findings</h4>
+                    <ul className="list-disc list-inside space-y-2 text-sm">
+                      {insights.keyFindings.map((finding, index) => (
+                        <li key={index}>{finding}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Recommendations</h4>
+                    <ul className="list-disc list-inside space-y-2 text-sm">
+                      {insights.recommendations.map((recommendation, index) => (
+                        <li key={index}>{recommendation}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>

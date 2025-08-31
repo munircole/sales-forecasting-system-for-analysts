@@ -2,19 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Upload,
-  BarChart3,
-  Brain,
-  Target,
-  TrendingUp,
-  Settings,
-  FileText,
-  Bell,
-  Shield,
-  User,
-  Database,
-} from "lucide-react"
+import { Upload, BarChart3, Brain, Target, TrendingUp, Settings, FileText, Bell, User, Database } from "lucide-react"
 import LoginForm from "@/components/auth/login-form"
 import UserProfile from "@/components/auth/user-profile"
 import DataUpload from "@/components/data-upload"
@@ -22,6 +10,7 @@ import DataPreprocessing from "@/components/data-preprocessing"
 import Analytics from "@/components/analytics"
 import ModelTraining from "@/components/model-training"
 import Predictions from "@/components/predictions"
+import AdvancedForecasting from "@/components/advanced-forecasting"
 import ModelEvaluation from "@/components/model-evaluation"
 import ReportsExports from "@/components/reports-exports"
 import NotificationsAlerts from "@/components/notifications-alerts"
@@ -197,19 +186,23 @@ export default function SalesForecastingSystem() {
 
       <div className="max-w-7xl mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-11 mb-8 bg-white/60 backdrop-blur-sm p-1 rounded-xl shadow-lg">
+          <TabsList className="grid w-full grid-cols-8 mb-8 bg-white/60 backdrop-blur-sm p-1 rounded-xl shadow-lg">
             {[
-              { id: "upload", icon: Upload, label: "Data Import" },
+              {
+                id: "upload",
+                icon: Upload,
+                label: "Data Import",
+              },
               { id: "preprocessing", icon: Settings, label: "Preprocessing" },
               { id: "analytics", icon: BarChart3, label: "EDA" },
               { id: "training", icon: Brain, label: "ML Training" },
               { id: "predictions", icon: TrendingUp, label: "Forecasting" },
               { id: "evaluation", icon: Target, label: "Evaluation" },
               { id: "reports", icon: FileText, label: "Reports" },
-              { id: "notifications", icon: Bell, label: "Alerts" },
-              { id: "storage", icon: Database, label: "Storage" },
-              { id: "database", icon: Database, label: "Database" },
-              { id: "settings", icon: Settings, label: "System Config" },
+              //{ id: "notifications", icon: Bell, label: "Alerts" },
+              //{ id: "storage", icon: Database, label: "Storage" },
+              //{ id: "database", icon: Database, label: "Database" },
+              //{ id: "settings", icon: Settings, label: "System Config" },
             ].map(({ id, icon: Icon, label }) => {
               const status = getTabStatus(id)
               return (
@@ -217,8 +210,7 @@ export default function SalesForecastingSystem() {
                   key={id}
                   value={id}
                   disabled={status === "disabled"}
-                  className={`
-                    flex items-center gap-2 p2 rounded-lg transition-all duration-200 text-xs
+                  className={`flex items-center gap-2 p-4 rounded-lg transition-all duration-200 text-xs
                     ${status === "completed" ? "bg-green-100 text-green-700 border border-green-200" : ""}
                     ${status === "current" ? "bg-blue-100 text-blue-700 border border-blue-200" : ""}
                     ${status === "disabled" ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}
@@ -254,7 +246,20 @@ export default function SalesForecastingSystem() {
             </TabsContent>
 
             <TabsContent value="predictions" className="mt-0">
-              <Predictions data={preprocessedData || uploadedData} models={trainedModels} systemConfig={systemConfig} />
+              <div className="space-y-6">
+                {/* Basic Predictions */}
+                <Predictions
+                  data={preprocessedData || uploadedData}
+                  models={trainedModels}
+                  systemConfig={systemConfig}
+                />
+
+                {/* Advanced Forecasting */}
+                <AdvancedForecasting
+                  data={preprocessedData || uploadedData}
+                  onForecastGenerated={(forecast) => console.log("Advanced forecast generated:", forecast)}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="evaluation" className="mt-0">
@@ -269,7 +274,7 @@ export default function SalesForecastingSystem() {
               />
             </TabsContent>
 
-            <TabsContent value="notifications" className="mt-0">
+            {/*<TabsContent value="notifications" className="mt-0">
               <NotificationsAlerts
                 models={trainedModels}
                 systemConfig={systemConfig}
@@ -287,7 +292,7 @@ export default function SalesForecastingSystem() {
 
             <TabsContent value="settings" className="mt-0">
               <SystemSettings config={systemConfig} onConfigUpdate={setSystemConfig} />
-            </TabsContent>
+            </TabsContent>*/}
           </div>
         </Tabs>
       </div>

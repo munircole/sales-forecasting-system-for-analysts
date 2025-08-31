@@ -57,6 +57,7 @@ export default function DataPreprocessing({ data, onDataProcessed }) {
 
     // Encoding
     encodeCategorical: "label",
+    handleHighCardinality: false,
   })
 
   const [processing, setProcessing] = useState(false)
@@ -732,6 +733,38 @@ export default function DataPreprocessing({ data, onDataProcessed }) {
     )
   }
 
+  const analyzeDataTypes = () => {
+    const columnTypes = {}
+
+    data.headers.forEach((column) => {
+      const sample = data.rows
+        .slice(0, 100)
+        .map((row) => row[column])
+        .filter((val) => val && val !== "")
+
+      // Check if numeric
+      const numericCount = sample.filter((val) => !isNaN(Number.parseFloat(val)) && isFinite(val)).length
+      const numericRatio = numericCount / sample.length
+
+      // Check if datetime
+      const dateCount = sample.filter((val) => !isNaN(Date.parse(val))).length
+      const dateRatio = dateCount / sample.length
+
+      // Determine type
+      if (numericRatio > 0.8) {
+        columnTypes[column] = "numeric"
+      } else if (dateRatio > 0.8) {
+        columnTypes[column] = "datetime"
+      } else {
+        const uniqueValues = new Set(sample).size
+        const uniqueRatio = uniqueValues / sample.length
+        columnTypes[column] = uniqueRatio < 0.5 ? "categorical" : "text"
+      }
+    })
+
+    return columnTypes
+  }
+
   return (
     <div className="space-y-6">
       {/* Data Quality Overview */}
@@ -1245,11 +1278,11 @@ export default function DataPreprocessing({ data, onDataProcessed }) {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Categorical Encoding</CardTitle>
+                    <CardTitle className="text-lg">Smart Categorical Encoding</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label>Encoding Method</Label>
+                      <Label>Encoding Strategy</Label>
                       <Select
                         value={processingOptions.encodeCategorical}
                         onValueChange={(value) => handleOptionChange("encodeCategorical", value)}
@@ -1259,10 +1292,23 @@ export default function DataPreprocessing({ data, onDataProcessed }) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">No encoding</SelectItem>
+                          <SelectItem value="auto">Auto-detect best method</SelectItem>
                           <SelectItem value="label">Label Encoding</SelectItem>
                           <SelectItem value="onehot">One-Hot Encoding</SelectItem>
+                          <SelectItem value="target">Target Encoding</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="handleHighCardinality"
+                        checked={processingOptions.handleHighCardinality || false}
+                        onCheckedChange={(checked) => handleOptionChange("handleHighCardinality", checked)}
+                      />
+                      <Label htmlFor="handleHighCardinality" className="font-medium">
+                        Smart handling for high-cardinality categories
+                      </Label>
                     </div>
                   </CardContent>
                 </Card>
@@ -1275,7 +1321,7 @@ export default function DataPreprocessing({ data, onDataProcessed }) {
             <Button
               onClick={processData}
               disabled={processing}
-              className="w-full h-12 text-lg bg-gradient-to-r from-green-600 to-green-600 hover:from-blue-700 hover:to-indigo-700"
+              className="w-full h-12 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
               <Play className="h-5 w-5 mr-2" />
               {processing ? "Processing Data..." : "Apply Preprocessing"}
