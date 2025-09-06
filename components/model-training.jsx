@@ -276,7 +276,7 @@ export default function ModelTraining({ data, onModelsTrained }) {
           <Button
             onClick={trainModels}
             disabled={!targetColumn || selectedModels.length === 0 || training}
-            className="w-full"
+            className="w-full bg-green-600 text-white"
           >
             <Play className="h-4 w-4 mr-2" />
             {training ? "Training Models..." : `Train ${selectedModels.length} Model(s)`}

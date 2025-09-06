@@ -162,7 +162,7 @@ export default function SalesForecastingSystem() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-600 bg-clip-text text-transparent mb-1">
                 Predictive Sales Forecasting System
               </h1>
-              <p className="text-sm text-gray-600">Enterprise-grade ML-powered sales analytics and predictions</p>
+              <p className="text-sm text-gray-600">ML-powered sales analytics and predictions</p>
             </div>
 
             {/* User Menu */}
@@ -186,7 +186,7 @@ export default function SalesForecastingSystem() {
 
       <div className="max-w-7xl mx-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-8 bg-white/60 backdrop-blur-sm p-1 rounded-xl shadow-lg">
+          <TabsList className="grid w-full h-[40px] grid-cols-8 mb-8 bg-white/60 backdrop-blur-sm  rounded-xl shadow-lg">
             {[
               {
                 id: "upload",
@@ -210,7 +210,7 @@ export default function SalesForecastingSystem() {
                   key={id}
                   value={id}
                   disabled={status === "disabled"}
-                  className={`flex items-center gap-2 p-4 rounded-lg transition-all duration-200 text-xs
+                  className={`flex items-center gap-2 p-4 rounded-lg transition-all duration-200 text-xs 
                     ${status === "completed" ? "bg-green-100 text-green-700 border border-green-200" : ""}
                     ${status === "current" ? "bg-blue-100 text-blue-700 border border-blue-200" : ""}
                     ${status === "disabled" ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}

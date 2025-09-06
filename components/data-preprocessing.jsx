@@ -1321,7 +1321,7 @@ export default function DataPreprocessing({ data, onDataProcessed }) {
             <Button
               onClick={processData}
               disabled={processing}
-              className="w-full h-12 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="w-full h-12 text-lg bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700"
             >
               <Play className="h-5 w-5 mr-2" />
               {processing ? "Processing Data..." : "Apply Preprocessing"}

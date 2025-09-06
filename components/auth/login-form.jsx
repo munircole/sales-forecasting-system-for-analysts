@@ -211,7 +211,7 @@ export default function LoginForm({ onLogin, onRegister }) {
                   </Alert>
                 )}
 
-                <Button type="submit" className="w-full text-white hover:text-white bg-green-700" disabled={loading}>
+                <Button type="submit" className="w-full text-white hover:text-white hover:bg-green-500 bg-green-700" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -404,7 +404,7 @@ export default function LoginForm({ onLogin, onRegister }) {
                   </Alert>
                 )}
 
-                <Button type="submit" className=" w-full text-white hover:text-white bg-green-700" disabled={loading}>
+                <Button type="submit" className=" w-full text-white hover:text-white hover:bg-green-500 bg-green-700" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

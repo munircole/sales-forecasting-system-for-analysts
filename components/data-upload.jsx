@@ -375,7 +375,7 @@ export default function DataUpload({ onDataUploaded, systemConfig }) {
                 <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">ERP System Integration</h3>
                 <p className="text-gray-600 mb-4">Connect to SAP, Oracle, Microsoft Dynamics, or other ERP systems</p>
-                <Button onClick={() => simulateAPIConnection("erp")} disabled={loading}>
+                <Button onClick={() => simulateAPIConnection("erp")} disabled={loading} className="w-full bg-green-700 text-white">
                   {loading ? "Connecting..." : "Configure ERP Connection"}
                 </Button>
               </div>
@@ -388,7 +388,7 @@ export default function DataUpload({ onDataUploaded, systemConfig }) {
                 <p className="text-gray-600 mb-4">
                   Connect to Square, Shopify POS, Clover, or other point-of-sale systems
                 </p>
-                <Button onClick={() => simulateAPIConnection("pos")} disabled={loading}>
+                <Button onClick={() => simulateAPIConnection("pos")} disabled={loading} className="w-full bg-green-700 text-white">
                   {loading ? "Connecting..." : "Configure POS Connection"}
                 </Button>
               </div>
@@ -399,7 +399,7 @@ export default function DataUpload({ onDataUploaded, systemConfig }) {
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">CRM System Integration</h3>
                 <p className="text-gray-600 mb-4">Connect to Salesforce, HubSpot, Pipedrive, or other CRM systems</p>
-                <Button onClick={() => simulateAPIConnection("crm")} disabled={loading}>
+                <Button onClick={() => simulateAPIConnection("crm")} disabled={loading} className="w-full bg-green-700 text-white">
                   {loading ? "Connecting..." : "Configure CRM Connection"}
                 </Button>
               </div>
@@ -412,7 +412,7 @@ export default function DataUpload({ onDataUploaded, systemConfig }) {
                 <p className="text-gray-600 mb-4">
                   Connect to REST APIs, PostgreSQL, MySQL, MongoDB, or other databases
                 </p>
-                <Button onClick={() => simulateAPIConnection("api")} disabled={loading}>
+                <Button onClick={() => simulateAPIConnection("api")} disabled={loading} className="w-full bg-green-700 text-white">
                   {loading ? "Connecting..." : "Configure API Connection"}
                 </Button>
               </div>
