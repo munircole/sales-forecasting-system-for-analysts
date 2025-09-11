@@ -280,7 +280,7 @@ export default function LoginForm({ onLogin, onRegister }) {
                       value={registerData.company}
                       onChange={(e) => setRegisterData((prev) => ({ ...prev, company: e.target.value }))}
                       className="pl-10"
-                      required
+                      
                     />
                   </div>
                 </div>
